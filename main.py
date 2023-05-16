@@ -12,7 +12,6 @@ class Item:
 
 
 class Knapsack:
-    # items: list[Item]
     def __init__(self, max_weight: float = 15):
         self.max_weight = max_weight
         self.items: list[Item] = []
@@ -107,12 +106,47 @@ random.shuffle(items)
 for item in items:
     print("Value: ", item.value, "Weight: ", item.weight, "Goal: ", item.goal())
 
-print("Random hill climbing")
-knapsack = random_hill_climbing(items)
-knapsack.print_items()
-print("Random hill climbing total value:", knapsack.get_total_value())
 
-print("Hill climbing")
-knapsack = hill_climbing(items)
-knapsack.print_items()
-print("Hill climbing total value:", knapsack.get_total_value())
+# print("Random hill climbing")
+# knapsack = random_hill_climbing(items)
+# knapsack.print_items()
+# print("Random hill climbing total value:", knapsack.get_total_value())
+#
+# print("Hill climbing")
+# knapsack = hill_climbing(items)
+# knapsack.print_items()
+# print("Hill climbing total value:", knapsack.get_total_value())
+
+# Chart animations
+def get_all_possible_solutions():
+    permutations = list(itertools.permutations(items))
+    random.shuffle(permutations)
+    possible_solutions = {}
+
+    for permutation in permutations:
+        knapsack = Knapsack()
+        knapsack.add_items(permutation)
+        index_name = ""
+        for item in permutation:
+            index_name += str(item.weight)
+            index_name += ","
+        possible_solutions[index_name] = knapsack.get_total_value()
+
+    return possible_solutions
+
+
+possible_solutions = get_all_possible_solutions()
+
+head = dict(list(possible_solutions.items())[:1000])
+
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
+plt.plot(list(head.keys()), list(head.values()))
+plt.title('title name')
+plt.xlabel('Permutations')
+plt.xticks([])
+plt.ylabel('Solution value')
+figure = plt.gcf()
+figure.set_size_inches(100, 10)
+plt.savefig("mygraph.png", dpi=100)
