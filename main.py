@@ -1,4 +1,5 @@
 import itertools
+import random
 
 
 class Item:
@@ -23,6 +24,10 @@ class Knapsack:
         self.items.append(item)
         return True
 
+    def add_items(self, items: list[Item]):
+        for item in items:
+            self.add_item(item)
+
     def get_total_weight(self):
         weight = 0
         for item in self.items:
@@ -39,9 +44,23 @@ class Knapsack:
         for item in self.items:
             print("Value: ", item.value, "Weight: ", item.weight)
 
-def hill_climbing(items: list[Item]):
 
+def random_hill_climbing(items: list[Item], iterations: int = 1000):
+    # Create basic knapsack
+    knapsack = Knapsack()
+    for item in items:
+        knapsack.add_item(item)
 
+    permutations = list(itertools.permutations(items))
+
+    for i in range(iterations):
+        # break if index out of range
+        new_knapsack = Knapsack()
+        new_knapsack.add_items(permutations[random.randint(0, len(permutations) - 1)])
+        if new_knapsack.get_total_value() > knapsack.get_total_value():
+            knapsack = new_knapsack
+
+    return knapsack
 
 
 items = [
@@ -53,11 +72,8 @@ items = [
     Item(7.5, 8.8),
 ]
 
-permutations = list(itertools.permutations(items))
-
-knapsack = Knapsack()
-
 for item in items:
-    knapsack.add_item(item)
+    print("Value: ", item.value, "Weight: ", item.weight, "Goal: ", item.goal())
 
+knapsack = random_hill_climbing(items)
 knapsack.print_items()
