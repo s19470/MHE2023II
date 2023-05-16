@@ -13,7 +13,7 @@ class Item:
 
 class Knapsack:
     # items: list[Item]
-    def __init__(self, max_weight: float = 10):
+    def __init__(self, max_weight: float = 15):
         self.max_weight = max_weight
         self.items: list[Item] = []
 
@@ -45,22 +45,48 @@ class Knapsack:
             print("Value: ", item.value, "Weight: ", item.weight)
 
 
+# Stochastic hill climbing
 def random_hill_climbing(items: list[Item], iterations: int = 1000):
-    # Create basic knapsack
+    # Init knapsack
     knapsack = Knapsack()
-    for item in items:
-        knapsack.add_item(item)
-
+    knapsack.add_items(items)
     permutations = list(itertools.permutations(items))
 
     for i in range(iterations):
-        # break if index out of range
         new_knapsack = Knapsack()
         new_knapsack.add_items(permutations[random.randint(0, len(permutations) - 1)])
         if new_knapsack.get_total_value() > knapsack.get_total_value():
             knapsack = new_knapsack
 
     return knapsack
+
+
+def hill_climbing(items: list[Item], iterations: int = 1000):
+    # Init knapsack
+    knapsack = Knapsack()
+    knapsack.add_items(items)
+
+    for i in range(iterations):
+        for neighbour_items in get_neighbours(items):
+            new_knapsack = Knapsack()
+            new_knapsack.add_items(neighbour_items)
+            if new_knapsack.get_total_value() > knapsack.get_total_value():
+                knapsack = new_knapsack
+
+    return knapsack
+
+
+def get_neighbours(items):
+    neighbours = []
+
+    for i in range(len(items)):
+        for j in range(i + 1, len(items)):
+            neighbour = items.copy()
+            neighbour[i] = items[j]
+            neighbour[j] = items[i]
+            neighbours.append(neighbour)
+
+    return neighbours
 
 
 items = [
@@ -70,10 +96,23 @@ items = [
     Item(0.7, 1.4),
     Item(8.9, 1.6),
     Item(7.5, 8.8),
+    Item(9.7, 7.2),
+    Item(1.3, 9.5),
+    Item(3.7, 4.5),
+    Item(6.1, 9.9),
 ]
+
+random.shuffle(items)
 
 for item in items:
     print("Value: ", item.value, "Weight: ", item.weight, "Goal: ", item.goal())
 
+print("Random hill climbing")
 knapsack = random_hill_climbing(items)
 knapsack.print_items()
+print("Random hill climbing total value:", knapsack.get_total_value())
+
+print("Hill climbing")
+knapsack = hill_climbing(items)
+knapsack.print_items()
+print("Hill climbing total value:", knapsack.get_total_value())
