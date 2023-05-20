@@ -45,17 +45,32 @@ class Knapsack:
 
 
 # Stochastic hill climbing
+random_knapsack_history = []
+random_chosen_knapsack = []
+
+
 def random_hill_climbing(items: list[Item], iterations: int = 1000):
     # Init knapsack
     knapsack = Knapsack()
     knapsack.add_items(items)
     permutations = list(itertools.permutations(items))
+    # print(permutations[:100])
+    random.shuffle(permutations)
+    # print(permutations[:100])
+    # exit()
+
 
     for i in range(iterations):
         new_knapsack = Knapsack()
-        new_knapsack.add_items(permutations[random.randint(0, len(permutations) - 1)])
+        new_knapsack.add_items(permutations[i])
+        random_knapsack_history.append({
+            'id': i,
+            'value': new_knapsack.get_total_value(),
+        })
+
         if new_knapsack.get_total_value() > knapsack.get_total_value():
             knapsack = new_knapsack
+            random_chosen_knapsack.append(id(new_knapsack))
 
     return knapsack
 
@@ -89,16 +104,16 @@ def get_neighbours(items):
 
 
 items = [
-    Item(1.7, 1.1),
-    Item(4.8, 5.5),
-    Item(9.2, 1.4),
-    Item(0.7, 1.4),
-    Item(8.9, 1.6),
-    Item(7.5, 8.8),
-    Item(9.7, 7.2),
-    Item(1.3, 9.5),
-    Item(3.7, 4.5),
-    Item(6.1, 9.9),
+    Item(3.9, 3.8),
+    Item(3.9, 1.6),
+    Item(4.0, 1.1),
+    Item(3.2, 4.3),
+    Item(2.3, 4.1),
+    Item(2.4, 1.7),
+    Item(4.0, 4.6),
+    Item(4.0, 1.4),
+    Item(3.6, 3.3),
+    Item(1.1, 1.5),
 ]
 
 random.shuffle(items)
@@ -116,6 +131,7 @@ for item in items:
 # knapsack = hill_climbing(items)
 # knapsack.print_items()
 # print("Hill climbing total value:", knapsack.get_total_value())
+
 
 # Chart animations
 def get_all_possible_solutions():
@@ -135,18 +151,41 @@ def get_all_possible_solutions():
     return possible_solutions
 
 
-possible_solutions = get_all_possible_solutions()
+# possible_solutions = get_all_possible_solutions()
 
-head = dict(list(possible_solutions.items())[:1000])
+# values = list(dict(list(possible_solutions.items())[:100]).values())
 
+# Animation
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-plt.plot(list(head.keys()), list(head.values()))
-plt.title('title name')
-plt.xlabel('Permutations')
-plt.xticks([])
-plt.ylabel('Solution value')
-figure = plt.gcf()
-figure.set_size_inches(100, 10)
-plt.savefig("mygraph.png", dpi=100)
+
+def animate(i, vl, period):
+    vl.set_xdata(random.randint(0, 99))
+    return vl,
+
+
+def make_animation(title: str, knapsacks, chosen_kanpsacks):
+    duration = 30
+    refreshPeriod = 300
+    plt.title(title)
+    plt.ylabel('Solution value')
+    plt.xlabel('Permutations')
+    plt.xticks([])
+    fig, ax = plt.subplots()
+    fig.set_size_inches(20, 5)
+    line = ax.axvline(0, ls='-', color='r', lw=1, zorder=10)
+    x = [sub['id'] for sub in knapsacks]
+    print(x)
+    y = [sub['value'] for sub in knapsacks]
+    print(y)
+    ax.plot(x, y)
+
+    ani = animation.FuncAnimation(fig, animate, frames=int(duration / (refreshPeriod / 1000)),
+                                  fargs=(line, refreshPeriod),
+                                  interval=refreshPeriod)
+    ani.save('test.gif')
+
+
+random_hill_climbing(items)
+make_animation("Random hill climbing", random_knapsack_history, random_chosen_knapsack)
